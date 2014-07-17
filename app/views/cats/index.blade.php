@@ -27,7 +27,7 @@
 
 @section('script')
 <script>
-
+  // register event handlers after the page has been loaded
   $(document).ready(function() {
     // event handler for all trash icons
     $('.glyphicon').click(function() {

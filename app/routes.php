@@ -77,12 +77,13 @@ Route::delete('cats/{cat}', function(Cat $cat) {
 });
 
 
-
+// get JSON for every cat
 Route::get('json', function() {
   $cats = Cat::all();
   return $cats;
 });
 
+// hitting this route deletes the cat by ID
 Route::get('json/{cat}', function (Cat $cat) {
   $cat->delete();
   return $cat;
