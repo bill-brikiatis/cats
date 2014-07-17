@@ -1,92 +1,94 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Application Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register all of the routes for an application.
-| It's a breeze. Simply tell Laravel the URIs it should respond to
-| and give it the Closure to execute when that URI is requested.
-|
-*/
+Route::model('cat', 'Cat');
 
+View::composer('cats.edit', function($view)
+{
+  $breeds = Breed::all();
+  $breed_options = array_combine($breeds->lists('id'), $breeds->lists('name'));
+  $view->with('breed_options', $breed_options);
+});
 
-// cats.loc ->> cats.loc/cats
 Route::get('/', function() {
-  return Redirect::to('cats');
+  return Redirect::to("cats");
 });
 
-// cats.loc/cats home page
-Route::get('cats', function() {
-  $cats = Cat::all();
-  return View::make('cats.index')
-    ->with('cats', $cats);
-});
-
-// get by breedname
-Route::get('cats/breeds/{name}', function($name) {
-  $breed = Breed::whereName($name)->with('cats')->first();
-  return View::make('cats.index')
-    ->with('breed', $breed)
-    ->with('cats', $breed->cats);
-});
-
-Route::model('cat','Cat');
-
-Route::get('cats/{cat}', function(Cat $cat) {
-  return View::make('cats.single')
-    ->with('cat',$cat);
-});
-
-
-// .loc/about
-Route::get('about', function() {
+Route::get('about', function(){
   return View::make('about')->with('number_of_cats', 9000);
 });
 
 
-// .loc/cats/create
+Route::get('cats', function(){
+  $cats = Cat::all();
+ // return $cats;
+  return View::make('cats/index')
+    ->with('cats', $cats);
+});
+
+Route::get('cats/breeds/{name}', function($name){
+  $breed = Breed::whereName($name)->with('cats')->first();
+  return View::make('cats/index')
+    ->with('breed', $breed)
+    ->with('cats', $breed->cats);
+});
+
 Route::get('cats/create', function() {
   $cat = new Cat;
   return View::make('cats.edit')
-    ->with('cat',$cat)
-    ->with('method','post');
+    ->with('cat', $cat)
+    ->with('method', 'post');
 });
+
+Route::post('cats', function(){
+  $cat = Cat::create(Input::all());
+  return Redirect::to('cats/' . $cat->id)
+    ->with('message', 'Successfully created profile!');
+});
+
+Route::get('cats/{id}', function($id) {
+  $cat = Cat::find($id);
+  return View::make('cats.single')
+    ->with('cat', $cat);
+});
+
 
 Route::get('cats/{cat}/edit', function(Cat $cat) {
   return View::make('cats.edit')
-    ->with('cat',$cat)
-    ->with('method', 'delete');
+    ->with('cat', $cat)
+    ->with('method', 'put');
 });
 
-Route::post('cats', function() {
-  $cat = Cat::create(Input::all());
-  return Redirect::to('cats/'.$cat->id)
-    ->with('message','Successfully created page!');
+Route::get('cats/{cat}/delete', function(Cat $cat) {
+  return View::make('cats.edit')
+    ->with('cat', $cat)
+    ->with('method', 'delete');
 });
 
 Route::put('cats/{cat}', function(Cat $cat) {
   $cat->update(Input::all());
-  return Redirect::to('cats/'.$cat->id)
-    ->with('message', 'Successfully updated page!');
+  return Redirect::to('cats/' . $cat->id)
+    ->with('message', 'Successfully updated profile!');
 });
 
 Route::delete('cats/{cat}', function(Cat $cat) {
   $cat->delete();
   return Redirect::to('cats')
-    ->with('message', 'Successfully deleted page!');
+    ->with('message', 'Successfully deleted profile!');
 });
 
 
 
-View::composer('cats.edit', function($view) {
-  $breeds = Breed::all();
-  if(count ($breeds) > 0) {
-    $breed_options = array_combine($breeds->lists('id'), $breeds->lists('name'));
-  } else {
-    $breed_options = array(null, 'Unspecified');
-  }
+Route::get('json', function() {
+  $cats = Cat::all();
+  return $cats;
 });
-// .loc/endpoint
+
+Route::get('json/{cat}', function (Cat $cat) {
+  $cat->delete();
+  return $cat;
+});
+
+
+
+
 
